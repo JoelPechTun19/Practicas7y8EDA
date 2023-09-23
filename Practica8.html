@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuadro Mágico</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        #input-container {
+            margin-top: 20px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input {
+            width: 50px;
+        }
+
+        button {
+            padding: 5px 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        #matrix-container {
+            margin-top: 20px;
+        }
+
+        table {
+            margin: 0 auto;
+            border-collapse: collapse;
+        }
+
+        td {
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            border: 1px solid #333;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cuadro Mágico</h1>
+    <div id="input-container">
+        <label for="size">Tamaño del Cuadro:</label>
+        <input type="number" id="size" min="2">
+        <button onclick="createMagicSquare()">Crear Cuadro Mágico</button>
+    </div>
+    <div id="matrix-container"></div>
+    <div id="result"></div>
+    <script>
+        class MagicSquare {
+            constructor(size) {
+                this.size = size;
+                this.matrix = this.createEmptyMatrix();
+            }
+
+            createEmptyMatrix() {
+                return Array.from({ length: this.size }, () => Array(this.size).fill(0));
+            }
+
+            isMagicSquare() {
+                const magicNumber = (this.size * (this.size * this.size + 1)) / 2;
+
+                // Comprueba las sumas de filas y columnas
+                for (let i = 0; i < this.size; i++) {
+                    let rowSum = 0;
+                    let colSum = 0;
+                    for (let j = 0; j < this.size; j++) {
+                        rowSum += this.matrix[i][j];
+                        colSum += this.matrix[j][i];
+                    }
+                    if (rowSum !== magicNumber || colSum !== magicNumber) {
+                        return false;
+                    }
+                }
+
+                // Comprueba las sumas de diagonales
+                let diag1Sum = 0;
+                let diag2Sum = 0;
+                for (let i = 0; i < this.size; i++) {
+                    diag1Sum += this.matrix[i][i];
+                    diag2Sum += this.matrix[i][this.size - i - 1];
+                }
+                if (diag1Sum !== magicNumber || diag2Sum !== magicNumber) {
+                    return false;
+                }
+
+                return true;
+            }
+
+            fillMatrix(matrixValues) {
+                for (let i = 0; i < this.size; i++) {
+                    for (let j = 0; j < this.size; j++) {
+                        this.matrix[i][j] = matrixValues[i][j];
+                    }
+                }
+            }
+        }
+
+        function createMagicSquare() {
+            const size = parseInt(document.getElementById("size").value);
+
+            if (isNaN(size) || size < 2) {
+                alert("Por favor, ingresa un tamaño válido (mínimo 2).");
+                return;
+            }
+
+            const matrixContainer = document.getElementById("matrix-container");
+            matrixContainer.innerHTML = "";
+
+            const table = document.createElement("table");
+            for (let i = 0; i < size; i++) {
+                const row = document.createElement("tr");
+                for (let j = 0; j < size; j++) {
+                    const cell = document.createElement("td");
+                    const input = document.createElement("input");
+                    input.type = "number";
+                    input.className = "matrix-input";
+                    cell.appendChild(input);
+                    row.appendChild(cell);
+                }
+                table.appendChild(row);
+            }
+            matrixContainer.appendChild(table);
+
+            const result = document.getElementById("result");
+            result.textContent = "";
+
+            const analyzeButton = document.createElement("button");
+            analyzeButton.textContent = "Analizar Cuadro Mágico";
+            analyzeButton.onclick = function () {
+                analyzeMagicSquare(size);
+            };
+            matrixContainer.appendChild(analyzeButton);
+        }
+
+        function analyzeMagicSquare(size) {
+            const matrixValues = [];
+            const matrixInputs = document.getElementsByClassName("matrix-input");
+
+            for (let i = 0; i < size; i++) {
+                const row = [];
+                for (let j = 0; j < size; j++) {
+                    const inputValue = parseInt(matrixInputs[i * size + j].value);
+                    if (isNaN(inputValue)) {
+                        alert("Por favor, ingresa valores numéricos en todas las celdas.");
+                        return;
+                    }
+                    row.push(inputValue);
+                }
+                matrixValues.push(row);
+            }
+
+            const magicSquare = new MagicSquare(size);
+            magicSquare.fillMatrix(matrixValues);
+
+            const result = document.getElementById("result");
+            if (magicSquare.isMagicSquare()) {
+                result.textContent = `Es un cuadro mágico con constante mágica: ${(size * (size * size + 1)) / 2}`;
+            } else {
+                result.textContent = "No es un cuadro mágico.";
+            }
+        }
+    </script>
+</body>
+</html>
